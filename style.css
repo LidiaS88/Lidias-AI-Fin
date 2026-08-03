@@ -210,6 +210,235 @@ button:active {
   text-decoration-color: var(--green-600);
 }
 
+.optional-tag {
+  font-size: 0.72rem;
+  font-weight: 500;
+  color: #4b6e58;
+  text-transform: none;
+}
+
+.ticker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 1.25rem;
+  padding-bottom: 0.75rem;
+  border-bottom: 2px solid var(--green-200);
+}
+
+.ticker-header h2 {
+  margin: 0 !important;
+  font-size: 1.8rem !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+/* Traffic Light Section */
+.traffic-light-card {
+  display: flex;
+  align-items: center;
+  gap: 1.25rem;
+  padding: 1.25rem;
+  background: linear-gradient(135deg, #0d281a 0%, #16402b 100%);
+  border-radius: 12px;
+  color: #ffffff;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 8px 20px rgba(4, 36, 22, 0.25);
+  border: 1px solid rgba(134, 239, 172, 0.25);
+}
+
+.traffic-light-box {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  background: #081a11;
+  padding: 0.6rem;
+  border-radius: 20px;
+  border: 2px solid #1a422e;
+  box-shadow: inset 0 2px 8px rgba(0,0,0,0.6);
+}
+
+.lamp {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  opacity: 0.25;
+  transition: all 0.3s ease;
+  background: #2b3a32;
+}
+
+.lamp.red {
+  background: #ef4444;
+}
+
+.lamp.yellow {
+  background: #f59e0b;
+}
+
+.lamp.green {
+  background: #22c55e;
+}
+
+.lamp.active {
+  opacity: 1;
+  transform: scale(1.12);
+}
+
+.lamp.red.active {
+  box-shadow: 0 0 16px #ef4444, 0 0 30px rgba(239, 68, 68, 0.6);
+}
+
+.lamp.yellow.active {
+  box-shadow: 0 0 16px #f59e0b, 0 0 30px rgba(245, 158, 11, 0.6);
+}
+
+.lamp.green.active {
+  box-shadow: 0 0 16px #22c55e, 0 0 30px rgba(34, 197, 94, 0.6);
+}
+
+.traffic-light-details {
+  flex: 1;
+}
+
+.signal-badge {
+  display: inline-block;
+  padding: 0.35rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.95rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 0.4rem;
+  font-family: 'Menlo', 'Courier New', monospace;
+}
+
+.badge-buy {
+  background: rgba(34, 197, 94, 0.2);
+  color: #4ade80;
+  border: 1px solid #22c55e;
+}
+
+.badge-sell {
+  background: rgba(239, 68, 68, 0.2);
+  color: #fca5a5;
+  border: 1px solid #ef4444;
+}
+
+.badge-hold {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fde047;
+  border: 1px solid #f59e0b;
+}
+
+.signal-subtext {
+  margin: 0;
+  font-size: 0.9rem;
+  line-height: 1.45;
+  color: #d1fae5;
+  font-family: system-ui, -apple-system, sans-serif;
+}
+
+/* MACD Metrics Grid */
+.macd-metrics-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+  gap: 0.85rem;
+  margin-bottom: 1.25rem;
+}
+
+.metric-card {
+  background: var(--green-50);
+  border: 1px solid var(--green-200);
+  border-radius: 8px;
+  padding: 0.85rem 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: transform 0.2s ease, border-color 0.2s ease;
+}
+
+.metric-card:hover {
+  border-color: var(--green-400);
+  transform: translateY(-2px);
+}
+
+.metric-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #2e543e;
+  letter-spacing: 0.04em;
+}
+
+.metric-value {
+  font-size: 1.25rem;
+  font-weight: 700;
+  font-family: 'Menlo', 'Courier New', monospace;
+}
+
+.metric-value.pos {
+  color: #15803d;
+}
+
+.metric-value.neg {
+  color: #b91c1c;
+}
+
+/* Research Note Box */
+.note-container {
+  margin-top: 1.25rem;
+  background: #ffffff;
+  border: 1px solid var(--green-200);
+  border-radius: 8px;
+  padding: 1.25rem;
+}
+
+.note-container h3 {
+  margin-top: 0;
+  margin-bottom: 0.6rem;
+  font-size: 1.1rem;
+  color: var(--green-950);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+#results .note {
+  margin-top: 0;
+  padding: 1rem 1.1rem;
+  background-color: var(--green-50);
+  border-left: 4px solid var(--green-700);
+  border-radius: 0 6px 6px 0;
+  color: var(--green-950);
+  line-height: 1.6;
+  font-size: 0.95rem;
+}
+
+/* Loading State */
+.loading-container {
+  text-align: center;
+  padding: 2.5rem 1rem;
+  color: var(--green-900);
+}
+
+.loading-spinner {
+  width: 36px;
+  height: 36px;
+  border: 4px solid var(--green-200);
+  border-top-color: var(--green-700);
+  border-radius: 50%;
+  margin: 0 auto 1rem;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .error {
   color: var(--error);
   font-weight: 600;
@@ -219,37 +448,6 @@ button:active {
   border-radius: 8px;
 }
 
-#results h2 {
-  margin-top: 0;
-  color: var(--green-950);
-  font-size: 1.5rem;
-  border-bottom: 2px solid var(--green-200);
-  padding-bottom: 0.6rem;
-}
-
-#results .price {
-  background-color: var(--green-100);
-  color: var(--green-950);
-  padding: 0.5rem 1rem;
-  border-radius: 8px;
-  display: inline-block;
-  font-weight: 700;
-  font-family: 'Menlo', 'Courier New', monospace;
-  font-size: 0.95rem;
-  border: 1.5px solid var(--green-300);
-  box-shadow: 0 2px 6px rgba(22, 197, 94, 0.12);
-}
-
-#results .note {
-  margin-top: 1.25rem;
-  padding: 1rem 1.25rem;
-  background-color: var(--green-50);
-  border-left: 5px solid var(--green-600);
-  border-radius: 0 8px 8px 0;
-  color: var(--green-950);
-  line-height: 1.6;
-  box-shadow: 0 2px 8px rgba(10, 58, 36, 0.04);
-}
 
 .app-footer {
   max-width: 660px;

@@ -1,9 +1,5 @@
-// GenAI Finance course, starter scaffold.
-// This file intentionally does very little. Build on it during class.
-//
-// No API keys are stored in this file. Both the Twelve Data key and the
-// OpenRouter key are entered in the form fields at run time, so nothing secret
-// is ever committed to your public repo or shipped in the source.
+// GenAI Finance course - Lidia's GenAI Finance Hub
+// Stock price data, MACD technical indicators, and AI research notes.
 
 const form = document.getElementById('ticker-form');
 const results = document.getElementById('results');
@@ -15,31 +11,39 @@ form.addEventListener('submit', async (event) => {
   const twelveDataKey = document.getElementById('twelvedata-key').value.trim();
   const openRouterKey = document.getElementById('openrouter-key').value.trim();
 
-  results.innerHTML = '<p>Loading...</p>';
+  results.innerHTML = `
+    <div class="loading-container">
+      <div class="loading-spinner"></div>
+      <p>Fetching price data and calculating MACD indicators for <strong>${ticker}</strong>...</p>
+    </div>
+  `;
 
   try {
     const priceData = await fetchPriceData(ticker, twelveDataKey);
-    const note = await getResearchNote(ticker, priceData, openRouterKey);
-    renderResults(ticker, priceData, note);
+    const macdInfo = calculateMACD(priceData);
+
+    let note = '';
+    if (openRouterKey) {
+      try {
+        note = await getResearchNote(ticker, priceData, macdInfo, openRouterKey);
+      } catch (aiErr) {
+        note = `<em>(AI Note fallback due to OpenRouter notice: ${aiErr.message})</em><br><br>${generateLocalNote(ticker, priceData, macdInfo)}`;
+      }
+    } else {
+      note = generateLocalNote(ticker, priceData, macdInfo);
+    }
+
+    renderResults(ticker, priceData, macdInfo, note);
   } catch (err) {
-    results.innerHTML = `<p class="error">Something went wrong: ${err.message}</p>`;
+    results.innerHTML = `<p class="error">⚠️ Unable to complete request: ${err.message}</p>`;
   }
 });
 
 // Twelve Data daily price history.
-// This endpoint sends CORS headers, so it works directly from the browser.
-// The free plan covers all US equities and ETFs (no ticker whitelist).
-// Returns an array of daily bars sorted oldest to newest, each shaped as
-// { date, open, high, low, close, volume } with numeric values.
-// Replace or extend with moving average, MACD, RSI calculations from Day 1.
 async function fetchPriceData(ticker, apiKey) {
-  // outputsize is the number of most-recent bars. ~63 trading days is about
-  // 3 months; 90 leaves a little headroom. Max allowed is 5000.
   const url = `https://api.twelvedata.com/time_series?symbol=${ticker}&interval=1day&outputsize=90&apikey=${apiKey}`;
   const response = await fetch(url);
 
-  // Read the body as text first, then parse it safely, so an unexpected
-  // non-JSON response gives a readable error instead of "Unexpected token".
   const body = await response.text();
   let raw;
   try {
@@ -48,13 +52,9 @@ async function fetchPriceData(ticker, apiKey) {
     throw new Error(body.trim() || 'Price fetch failed');
   }
 
-  // Twelve Data reports problems as { code, status: "error", message }.
   if (raw && raw.status === 'error') throw new Error(raw.message || 'Price fetch failed');
   if (!response.ok) throw new Error('Price fetch failed');
 
-  // Successful responses look like { meta, values: [ { datetime, open, ... } ] },
-  // newest first. Normalize to numbers and sort oldest to newest so indicator
-  // math (moving averages, RSI, ...) reads left to right.
   const values = raw.values ?? [];
   if (!values.length) throw new Error(`No price data returned for ${ticker}`);
 
@@ -70,11 +70,143 @@ async function fetchPriceData(ticker, apiKey) {
     .sort((a, b) => (a.date < b.date ? -1 : 1));
 }
 
-// OpenRouter call. The price data above is summarized and handed to the model
-// so the note reflects the actual numbers you fetched. Replace the model,
-// prompt, and system prompt with whatever you designed in the Prompt
-// Engineering session.
-async function getResearchNote(ticker, priceData, apiKey) {
+/**
+ * Calculates Exponential Moving Average (EMA)
+ */
+function calculateEMA(values, period) {
+  if (values.length < period) return new Array(values.length).fill(null);
+
+  const k = 2 / (period + 1);
+  const emaArray = new Array(values.length).fill(null);
+
+  let sum = 0;
+  for (let i = 0; i < period; i++) {
+    sum += values[i];
+  }
+  let prevEma = sum / period;
+  emaArray[period - 1] = prevEma;
+
+  for (let i = period; i < values.length; i++) {
+    const currentEma = values[i] * k + prevEma * (1 - k);
+    emaArray[i] = currentEma;
+    prevEma = currentEma;
+  }
+
+  return emaArray;
+}
+
+/**
+ * Calculates MACD (12, 26, 9) and Traffic Light Recommendation Signal
+ */
+function calculateMACD(priceData) {
+  const closes = priceData.map((b) => b.close);
+  const ema12 = calculateEMA(closes, 12);
+  const ema26 = calculateEMA(closes, 26);
+
+  const macdValues = priceData.map((_, i) => {
+    if (ema12[i] !== null && ema26[i] !== null) {
+      return ema12[i] - ema26[i];
+    }
+    return null;
+  });
+
+  // Extract non-null MACD values to compute 9-day Signal line EMA
+  const validMacdStartIndex = macdValues.findIndex((val) => val !== null);
+  const validMacdValues = macdValues.slice(validMacdStartIndex);
+  const signalEma = calculateEMA(validMacdValues, 9);
+
+  const signalLine = priceData.map((_, i) => {
+    if (i < validMacdStartIndex) return null;
+    const relativeIndex = i - validMacdStartIndex;
+    return signalEma[relativeIndex];
+  });
+
+  const histogram = priceData.map((_, i) => {
+    if (macdValues[i] !== null && signalLine[i] !== null) {
+      return macdValues[i] - signalLine[i];
+    }
+    return null;
+  });
+
+  const lastIdx = priceData.length - 1;
+  const prevIdx = lastIdx - 1;
+
+  const latestMacd = macdValues[lastIdx];
+  const latestSignal = signalLine[lastIdx];
+  const latestHist = histogram[lastIdx];
+  const prevHist = histogram[prevIdx];
+
+  let trafficLight = 'HOLD'; // 'BUY', 'SELL', 'HOLD'
+  let statusText = 'HOLD / NEUTRAL';
+  let statusSubtext = 'MACD and Signal lines are hovering near equilibrium.';
+
+  if (latestHist !== null && prevHist !== null) {
+    const isBullish = latestHist > 0;
+    const isCrossOver = (latestHist > 0 && prevHist <= 0) || (latestHist < 0 && prevHist >= 0);
+    const isExpanding = isBullish ? latestHist > prevHist : latestHist < prevHist;
+
+    if (isCrossOver && isBullish) {
+      trafficLight = 'BUY';
+      statusText = 'STRONG BUY';
+      statusSubtext = '🚀 Bullish MACD Crossover! MACD line crossed above Signal line.';
+    } else if (isCrossOver && !isBullish) {
+      trafficLight = 'SELL';
+      statusText = 'STRONG SELL';
+      statusSubtext = '📉 Bearish MACD Crossover! MACD line crossed below Signal line.';
+    } else if (isBullish && isExpanding) {
+      trafficLight = 'BUY';
+      statusText = 'BUY / BULLISH';
+      statusSubtext = '🟢 Positive momentum: MACD above Signal line with widening histogram.';
+    } else if (!isBullish && isExpanding) {
+      trafficLight = 'SELL';
+      statusText = 'SELL / BEARISH';
+      statusSubtext = '🔴 Negative momentum: MACD below Signal line with widening negative histogram.';
+    } else {
+      trafficLight = 'HOLD';
+      statusText = 'HOLD / NEUTRAL';
+      statusSubtext = isBullish
+        ? '🟡 MACD is above Signal, but momentum is slowing down. Hold position or monitor.'
+        : '🟡 MACD is below Signal, but selling pressure is easing. Await clearer crossover.';
+    }
+  }
+
+  return {
+    latest: {
+      macd: latestMacd,
+      signal: latestSignal,
+      histogram: latestHist,
+      ema12: ema12[lastIdx],
+      ema26: ema26[lastIdx]
+    },
+    previous: {
+      macd: macdValues[prevIdx],
+      signal: signalLine[prevIdx],
+      histogram: prevHist
+    },
+    trafficLight,
+    statusText,
+    statusSubtext
+  };
+}
+
+function generateLocalNote(ticker, priceData, macdInfo) {
+  const first = priceData[0];
+  const latest = priceData[priceData.length - 1];
+  const pctChange = ((latest.close - first.close) / first.close) * 100;
+  const direction = pctChange >= 0 ? 'upward' : 'downward';
+
+  return `
+    <strong>Automated Technical Briefing:</strong> Over the past ${priceData.length} trading days (${first.date} to ${latest.date}), 
+    <strong>${ticker}</strong> moved in a <strong>${direction}</strong> trajectory of <strong>${pctChange >= 0 ? '+' : ''}${pctChange.toFixed(2)}%</strong> 
+    (from $${first.close.toFixed(2)} to $${latest.close.toFixed(2)}). 
+    The 12-day EMA ($${macdInfo.latest.ema12?.toFixed(2)}) relative to the 26-day EMA ($${macdInfo.latest.ema26?.toFixed(2)}) 
+    yields a MACD reading of <strong>${macdInfo.latest.macd?.toFixed(2)}</strong> versus a Signal reading of <strong>${macdInfo.latest.signal?.toFixed(2)}</strong>. 
+    ${macdInfo.statusSubtext}
+  `;
+}
+
+// OpenRouter call handed summarized price data + MACD
+async function getResearchNote(ticker, priceData, macdInfo, apiKey) {
   const first = priceData[0];
   const latest = priceData[priceData.length - 1];
   const pctChange = ((latest.close - first.close) / first.close) * 100;
@@ -82,7 +214,10 @@ async function getResearchNote(ticker, priceData, apiKey) {
   const summary =
     `${ticker} daily closes from ${first.date} to ${latest.date}: ` +
     `start $${first.close.toFixed(2)}, latest $${latest.close.toFixed(2)}, ` +
-    `change ${pctChange.toFixed(1)}% over ${priceData.length} trading days.`;
+    `change ${pctChange.toFixed(2)}% over ${priceData.length} trading days. ` +
+    `MACD (12,26,9) Indicators: MACD Line = ${macdInfo.latest.macd?.toFixed(2)}, ` +
+    `Signal Line = ${macdInfo.latest.signal?.toFixed(2)}, Histogram = ${macdInfo.latest.histogram?.toFixed(2)}. ` +
+    `Traffic Light Recommendation: ${macdInfo.trafficLight} (${macdInfo.statusSubtext}).`;
 
   const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
     method: 'POST',
@@ -92,44 +227,37 @@ async function getResearchNote(ticker, priceData, apiKey) {
     },
     body: JSON.stringify({
       model: 'anthropic/claude-sonnet-5',
-      // Sonnet 5 is a reasoning model. If max_tokens is too small to also cover
-      // its reasoning tokens, the request is rejected with a 400 "Provider
-      // returned error". This note is short, so turn reasoning off and leave
-      // comfortable headroom for the reply.
       max_tokens: 2000,
       reasoning: { enabled: false },
       messages: [
-        { role: 'system', content: 'You are a financial research assistant. Be concise and factual.' },
-        { role: 'user', content: `${summary}\n\nWrite a one paragraph research note for ${ticker} based on this recent price action.` }
+        {
+          role: 'system',
+          content: 'You are a senior financial analyst providing executive technical research notes for Lidia Singla.'
+        },
+        {
+          role: 'user',
+          content: `${summary}\n\nWrite a concise one-paragraph research note for ${ticker} analyzing the recent price performance, the MACD technical indicators, and explaining why the Traffic Light signal is ${macdInfo.trafficLight}.`
+        }
       ]
     })
   });
-  // Surface what OpenRouter actually said, so a failed call tells you the real
-  // reason (bad key, no credits, rate limit, provider error) instead of a
-  // generic message you cannot act on.
-  if (!response.ok) throw new Error(`OpenRouter call failed. ${await readOpenRouterError(response)}`);
+
+  if (!response.ok) throw new Error(await readOpenRouterError(response));
   const data = await response.json();
-  return data.choices?.[0]?.message?.content ?? 'No response.';
+  return data.choices?.[0]?.message?.content ?? generateLocalNote(ticker, priceData, macdInfo);
 }
 
-// Pulls the useful part out of an OpenRouter error response: the HTTP status,
-// a plain-language hint for the common cases, and the message OpenRouter (or
-// the upstream provider) actually returned.
 async function readOpenRouterError(response) {
   let message = '';
   try {
     const body = await response.json();
     const err = body.error ?? body;
     message = err.message || '';
-    // On a "Provider returned error", the provider's own message is under
-    // metadata rather than the top-level message field.
     const provider = err.metadata?.provider_name;
     const raw = err.metadata?.raw;
     if (provider) message += ` [provider: ${provider}]`;
     if (raw) message += ` ${typeof raw === 'string' ? raw : JSON.stringify(raw)}`;
-  } catch {
-    // Response body was not JSON; the status code below still says something.
-  }
+  } catch {}
   const hint = {
     401: 'Your API key looks invalid or missing',
     402: 'This model is paid and your OpenRouter account is out of credits',
@@ -138,13 +266,55 @@ async function readOpenRouterError(response) {
   return [`(HTTP ${response.status})`, hint, message].filter(Boolean).join(' ');
 }
 
-function renderResults(ticker, priceData, note) {
-  // priceData is sorted oldest to newest, so the last bar is the most recent.
+function renderResults(ticker, priceData, macdInfo, note) {
   const latest = priceData[priceData.length - 1];
+  const light = macdInfo.trafficLight; // 'BUY', 'HOLD', 'SELL'
 
   results.innerHTML = `
-    <h2>${ticker}</h2>
-    <p class="price">Latest close (${latest.date}): $${latest.close.toFixed(2)}</p>
-    <p class="note">${note}</p>
+    <div class="ticker-header">
+      <h2>${ticker}</h2>
+      <span class="price">Latest Close (${latest.date}): $${latest.close.toFixed(2)}</span>
+    </div>
+
+    <!-- Traffic Light Signal Section -->
+    <div class="traffic-light-card traffic-light-${light.toLowerCase()}">
+      <div class="traffic-light-box">
+        <div class="lamp red ${light === 'SELL' ? 'active' : ''}"></div>
+        <div class="lamp yellow ${light === 'HOLD' ? 'active' : ''}"></div>
+        <div class="lamp green ${light === 'BUY' ? 'active' : ''}"></div>
+      </div>
+      <div class="traffic-light-details">
+        <div class="signal-badge badge-${light.toLowerCase()}">${macdInfo.statusText}</div>
+        <p class="signal-subtext">${macdInfo.statusSubtext}</p>
+      </div>
+    </div>
+
+    <!-- MACD Indicator Breakdown -->
+    <div class="macd-metrics-grid">
+      <div class="metric-card">
+        <span class="metric-label">MACD Line (12,26)</span>
+        <span class="metric-value ${macdInfo.latest.macd >= 0 ? 'pos' : 'neg'}">
+          ${macdInfo.latest.macd !== null ? (macdInfo.latest.macd >= 0 ? '+' : '') + macdInfo.latest.macd.toFixed(3) : 'N/A'}
+        </span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Signal Line (9)</span>
+        <span class="metric-value ${macdInfo.latest.signal >= 0 ? 'pos' : 'neg'}">
+          ${macdInfo.latest.signal !== null ? (macdInfo.latest.signal >= 0 ? '+' : '') + macdInfo.latest.signal.toFixed(3) : 'N/A'}
+        </span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">Histogram</span>
+        <span class="metric-value ${macdInfo.latest.histogram >= 0 ? 'pos' : 'neg'}">
+          ${macdInfo.latest.histogram !== null ? (macdInfo.latest.histogram >= 0 ? '+' : '') + macdInfo.latest.histogram.toFixed(3) : 'N/A'}
+        </span>
+      </div>
+    </div>
+
+    <div class="note-container">
+      <h3>AI Research & Indicator Analysis</h3>
+      <p class="note">${note}</p>
+    </div>
   `;
 }
+
