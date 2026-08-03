@@ -1,16 +1,17 @@
 :root {
-  /* Shades of Green Palette */
-  --green-950: #062c1e;   /* Deep Forest Green - Main dark text & h1 */
-  --green-900: #0f4d34;   /* Pine Green - Buttons & strong elements */
-  --green-800: #166534;   /* Deep Emerald - Subtitles & section headers */
-  --green-700: #15803d;   /* Emerald Green - Accents & active highlights */
-  --green-600: #16a34a;   /* Fresh Leaf Green - Focus rings & button hovers */
-  --green-500: #22c55e;   /* Vivid Green - Status indicators */
-  --green-300: #86efac;   /* Mint Highlight Border */
-  --green-200: #a7f3d0;   /* Light Mint Line/Border */
-  --green-100: #d1fae5;   /* Soft Sage Tint - Badges & highlight panels */
-  --green-50:  #f0fdf4;   /* Very Light Mint - Input backgrounds & cards */
-  --green-paper: #f4fbf7; /* Light Greenish Canvas Page Background */
+  /* Rich Forest & Emerald Green Palette */
+  --green-950: #042416;   /* Deep Forest Green */
+  --green-900: #0a3a24;   /* Dark Emerald */
+  --green-800: #125435;   /* Deep Pine */
+  --green-700: #15803d;   /* Emerald Green */
+  --green-600: #16a34a;   /* Fresh Leaf Green */
+  --green-500: #22c55e;   /* Vibrant Jade Green */
+  --green-400: #4ade80;   /* Bright Mint Accent */
+  --green-300: #86efac;   /* Light Mint Highlight */
+  --green-200: #bbf7d0;   /* Sage Border */
+  --green-100: #dcfce7;   /* Soft Emerald Tint */
+  --green-50:  #f0fdf4;   /* Very Light Mint */
+  --green-paper: #eef9f3; /* Rich Mint Canvas Background */
 
   --ink: var(--green-950);
   --paper: var(--green-paper);
@@ -25,76 +26,98 @@
 
 body {
   margin: 0;
-  background: var(--paper);
+  background: linear-gradient(180deg, #e3f5eb 0%, var(--green-paper) 100%);
   color: var(--ink);
   font-family: 'Georgia', 'Iowan Old Style', serif;
   line-height: 1.5;
+  min-height: 100vh;
 }
 
 .app-header {
-  padding: 2.25rem 1.5rem 1.25rem;
-  background: linear-gradient(180deg, #e6f7ee 0%, var(--green-paper) 100%);
-  border-bottom: 1px solid var(--green-200);
+  padding: 2.5rem 1.5rem 1.5rem;
+  background: linear-gradient(135deg, #093822 0%, #125435 60%, #1a6b44 100%);
+  border-bottom: 3px solid var(--green-500);
   text-align: center;
+  color: #ffffff;
+  box-shadow: 0 4px 20px rgba(4, 36, 22, 0.2);
+}
+
+.user-badge {
+  display: inline-block;
+  margin-bottom: 0.6rem;
+}
+
+.user-badge span {
+  background: rgba(255, 255, 255, 0.15);
+  backdrop-filter: blur(8px);
+  color: var(--green-300);
+  font-family: 'Menlo', 'Courier New', monospace;
+  font-size: 0.82rem;
+  font-weight: 700;
+  padding: 0.3rem 0.85rem;
+  border-radius: 20px;
+  border: 1px solid rgba(134, 239, 172, 0.35);
+  letter-spacing: 0.03em;
 }
 
 .app-header h1 {
   margin: 0;
-  font-size: 1.8rem;
-  letter-spacing: 0.01em;
-  color: var(--green-950);
+  font-size: 2rem;
+  letter-spacing: -0.01em;
+  color: #ffffff;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
 }
 
 .subtitle {
-  margin: 0.35rem 0 0;
+  margin: 0.5rem 0 0;
   font-family: 'Menlo', 'Courier New', monospace;
-  font-size: 0.85rem;
-  color: var(--green-800);
+  font-size: 0.88rem;
+  color: var(--green-300);
   font-weight: 600;
 }
 
 .app-main {
-  max-width: 640px;
+  max-width: 660px;
   margin: 0 auto;
-  padding: 1.5rem;
+  padding: 2rem 1.5rem;
   display: grid;
-  gap: 1.5rem;
+  gap: 1.75rem;
 }
 
 .panel {
   border: 1px solid var(--green-200);
-  border-radius: 8px;
-  padding: 1.5rem;
+  border-radius: 12px;
+  padding: 1.75rem;
   background: #ffffff;
-  box-shadow: 0 4px 12px rgba(15, 77, 52, 0.04);
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 6px 18px rgba(10, 58, 36, 0.06);
+  transition: border-color 0.25 ease, box-shadow 0.25s ease, transform 0.2s ease;
 }
 
 .panel:hover {
-  border-color: var(--green-300);
-  box-shadow: 0 6px 16px rgba(15, 77, 52, 0.07);
+  border-color: var(--green-400);
+  box-shadow: 0 8px 24px rgba(10, 58, 36, 0.1);
 }
 
 form {
   display: grid;
-  gap: 0.6rem;
+  gap: 0.75rem;
 }
 
 label {
   font-family: 'Menlo', 'Courier New', monospace;
   font-size: 0.8rem;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
+  letter-spacing: 0.06em;
   color: var(--green-900);
   font-weight: 700;
 }
 
 input {
-  padding: 0.6rem 0.75rem;
-  border: 1px solid var(--green-200);
+  padding: 0.7rem 0.85rem;
+  border: 1.5px solid var(--green-200);
   background-color: var(--green-50);
   color: var(--green-950);
-  border-radius: 6px;
+  border-radius: 8px;
   font-size: 1rem;
   font-family: inherit;
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
@@ -104,32 +127,33 @@ input:focus {
   outline: none;
   background-color: #ffffff;
   border-color: var(--green-600);
-  box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.18);
+  box-shadow: 0 0 0 3.5px rgba(22, 197, 94, 0.25);
 }
 
 input::placeholder {
-  color: #658a74;
+  color: #5c836c;
 }
 
 button {
   margin-top: 0.5rem;
-  padding: 0.7rem 1.25rem;
-  background: var(--green-900);
+  padding: 0.8rem 1.5rem;
+  background: linear-gradient(135deg, var(--green-800) 0%, var(--green-900) 100%);
   color: #ffffff;
-  border: none;
-  border-radius: 6px;
-  font-size: 1rem;
-  font-weight: 600;
+  border: 1px solid var(--green-700);
+  border-radius: 8px;
+  font-size: 1.05rem;
+  font-weight: 700;
   cursor: pointer;
   width: fit-content;
-  transition: background-color 0.2s ease, transform 0.1s ease, box-shadow 0.2s ease;
-  box-shadow: 0 2px 4px rgba(6, 44, 30, 0.15);
+  transition: all 0.2s ease;
+  box-shadow: 0 3px 8px rgba(10, 58, 36, 0.22);
 }
 
 button:hover {
-  background: var(--green-600);
-  box-shadow: 0 4px 8px rgba(22, 163, 74, 0.25);
-  transform: translateY(-1px);
+  background: linear-gradient(135deg, var(--green-700) 0%, var(--green-800) 100%);
+  border-color: var(--green-500);
+  box-shadow: 0 6px 14px rgba(22, 163, 74, 0.3);
+  transform: translateY(-2px);
 }
 
 button:active {
@@ -137,75 +161,83 @@ button:active {
 }
 
 .placeholder {
-  color: #4b6e58;
+  color: #3d634e;
   font-style: italic;
   margin: 0;
+  text-align: center;
+  padding: 1rem 0;
 }
 
 .field-hint {
   margin: 0 0 0.5rem;
   font-size: 0.78rem;
   font-style: italic;
-  color: #3b634b;
+  color: #2e543e;
 }
 
 .field-hint a {
   color: var(--green-700);
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: underline;
   text-decoration-color: var(--green-300);
 }
 
 .field-hint a:hover {
-  color: var(--green-900);
+  color: var(--green-950);
   text-decoration-color: var(--green-600);
 }
 
 .error {
   color: var(--error);
   font-weight: 600;
-  padding: 0.75rem;
+  padding: 0.85rem;
   background: #fef2f2;
   border: 1px solid #fecaca;
-  border-radius: 6px;
+  border-radius: 8px;
 }
 
 #results h2 {
   margin-top: 0;
   color: var(--green-950);
   font-size: 1.5rem;
-  border-bottom: 2px solid var(--green-100);
-  padding-bottom: 0.5rem;
+  border-bottom: 2px solid var(--green-200);
+  padding-bottom: 0.6rem;
 }
 
 #results .price {
   background-color: var(--green-100);
   color: var(--green-950);
-  padding: 0.4rem 0.8rem;
-  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
   display: inline-block;
-  font-weight: 600;
+  font-weight: 700;
   font-family: 'Menlo', 'Courier New', monospace;
-  font-size: 0.9rem;
-  border: 1px solid var(--green-200);
+  font-size: 0.95rem;
+  border: 1.5px solid var(--green-300);
+  box-shadow: 0 2px 6px rgba(22, 197, 94, 0.12);
 }
 
 #results .note {
-  margin-top: 1rem;
-  padding: 0.85rem 1.1rem;
+  margin-top: 1.25rem;
+  padding: 1rem 1.25rem;
   background-color: var(--green-50);
-  border-left: 4px solid var(--green-700);
-  border-radius: 0 6px 6px 0;
+  border-left: 5px solid var(--green-600);
+  border-radius: 0 8px 8px 0;
   color: var(--green-950);
   line-height: 1.6;
+  box-shadow: 0 2px 8px rgba(10, 58, 36, 0.04);
 }
 
 .app-footer {
-  max-width: 640px;
+  max-width: 660px;
   margin: 0 auto;
-  padding: 0 1.5rem 2rem;
+  padding: 0.5rem 1.5rem 2.5rem;
   font-size: 0.85rem;
-  color: #4b6e58;
+  color: #2e543e;
   text-align: center;
+}
+
+.app-footer strong {
+  color: var(--green-900);
 }
 

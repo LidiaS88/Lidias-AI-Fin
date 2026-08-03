@@ -1,6 +1,6 @@
 {
-  "name": "GenAI Finance App",
-  "description": "Financial research single-page application using stock price data and AI notes.",
+  "name": "Lidia's GenAI Finance Hub",
+  "description": "Lidia's personalized GenAI Finance App for stock price data and AI-powered financial research.",
   "requestFramePermissions": [],
   "majorCapabilities": [
     "MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"
