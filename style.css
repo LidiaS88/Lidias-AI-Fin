@@ -34,12 +34,35 @@ body {
 }
 
 .app-header {
-  padding: 2.5rem 1.5rem 1.5rem;
+  padding: 2.25rem 1.5rem 1.5rem;
   background: linear-gradient(135deg, #093822 0%, #125435 60%, #1a6b44 100%);
   border-bottom: 3px solid var(--green-500);
   text-align: center;
   color: #ffffff;
   box-shadow: 0 4px 20px rgba(4, 36, 22, 0.2);
+}
+
+.logo-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 0.85rem;
+}
+
+.app-logo {
+  width: 88px;
+  height: 88px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 3px solid var(--green-300);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25), 0 0 0 4px rgba(34, 197, 94, 0.2);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  background-color: #ffffff;
+}
+
+.app-logo:hover {
+  transform: scale(1.06) rotate(-3deg);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.35), 0 0 0 6px rgba(34, 197, 94, 0.35);
 }
 
 .user-badge {
